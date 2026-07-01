@@ -217,9 +217,18 @@ const translations = {
 };
 
 let currentLang = "zh";
+const caseOrder = Object.keys(cases);
+let activeCase = "clients";
 const tabs = document.querySelectorAll(".case-tab");
 const caseImage = document.querySelector("#case-image");
+const caseTrack = document.querySelector(".case-track");
+const caseSlides = document.querySelectorAll(".case-slide");
+const caseDots = document.querySelectorAll(".case-dot");
+const casePrev = document.querySelector("[data-case-prev]");
+const caseNext = document.querySelector("[data-case-next]");
 const langToggle = document.querySelector("[data-lang-toggle]");
+const carouselAutoplayMs = 3200;
+let carouselTimer;
 const revealItems = document.querySelectorAll(
   ".section, .section-band, .showcase, .contact, .service-card, .timeline li, .quality-cards article, .supplier-grid span, .download-card"
 );
@@ -257,27 +266,112 @@ const applyLanguage = (lang) => {
 
   langToggle.textContent = lang === "zh" ? "EN" : "中文";
 
-  const selectedCase = document.querySelector(".case-tab.is-active")?.dataset.case || "clients";
-  if (caseImage && cases[selectedCase]) {
-    caseImage.alt = cases[selectedCase].alt[lang];
+  if (caseImage && cases[activeCase]) {
+    caseImage.alt = cases[activeCase].alt[lang];
   }
+
+  caseSlides.forEach((slide) => {
+    const selected = cases[slide.dataset.case];
+    const img = slide.querySelector("img");
+    if (selected && img) img.alt = selected.alt[lang];
+  });
 };
 
-tabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const selected = cases[tab.dataset.case];
-    if (!selected) return;
+const setActiveCase = (caseKey, options = {}) => {
+  const selected = cases[caseKey];
+  if (!selected) return;
 
-    tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
+  const activeIndex = caseOrder.indexOf(caseKey);
+  const hasChanged = activeCase !== caseKey;
+  activeCase = caseKey;
+
+  tabs.forEach((item) => item.classList.toggle("is-active", item.dataset.case === caseKey));
+  caseDots.forEach((dot, index) => dot.classList.toggle("is-active", index === activeIndex));
+
+  if (caseImage && hasChanged) {
     caseImage.classList.add("is-switching");
     caseImage.src = selected.image;
     caseImage.alt = selected.alt[currentLang];
     window.setTimeout(() => caseImage.classList.remove("is-switching"), 220);
+  }
+
+  if (options.scroll !== false && caseSlides[activeIndex]) {
+    caseSlides[activeIndex].scrollIntoView({
+      behavior: options.instant ? "auto" : "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }
+};
+
+const advanceCase = () => {
+  const currentIndex = caseOrder.indexOf(activeCase);
+  const nextIndex = (currentIndex + 1) % caseOrder.length;
+  setActiveCase(caseOrder[nextIndex]);
+};
+
+const startCarouselAutoplay = () => {
+  if (!caseTrack) return;
+  window.clearInterval(carouselTimer);
+  carouselTimer = window.setInterval(advanceCase, carouselAutoplayMs);
+};
+
+const restartCarouselAutoplay = () => {
+  startCarouselAutoplay();
+};
+
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    setActiveCase(tab.dataset.case, { scroll: false });
+    restartCarouselAutoplay();
   });
 });
+
+caseDots.forEach((dot) => {
+  dot.addEventListener("click", () => {
+    setActiveCase(caseOrder[Number(dot.dataset.caseDot)]);
+    restartCarouselAutoplay();
+  });
+});
+
+casePrev?.addEventListener("click", () => {
+  const currentIndex = caseOrder.indexOf(activeCase);
+  const nextIndex = (currentIndex - 1 + caseOrder.length) % caseOrder.length;
+  setActiveCase(caseOrder[nextIndex]);
+  restartCarouselAutoplay();
+});
+
+caseNext?.addEventListener("click", () => {
+  advanceCase();
+  restartCarouselAutoplay();
+});
+
+caseTrack?.addEventListener(
+  "scroll",
+  () => {
+    const trackCenter = caseTrack.scrollLeft + caseTrack.clientWidth / 2;
+    let nearestSlide = caseSlides[0];
+    let nearestDistance = Infinity;
+
+    caseSlides.forEach((slide) => {
+      const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
+      const distance = Math.abs(trackCenter - slideCenter);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestSlide = slide;
+      }
+    });
+
+    if (nearestSlide) setActiveCase(nearestSlide.dataset.case, { scroll: false });
+  },
+  { passive: true }
+);
+
+caseTrack?.addEventListener("pointerdown", restartCarouselAutoplay);
 
 langToggle.addEventListener("click", () => {
   applyLanguage(currentLang === "zh" ? "en" : "zh");
 });
 
 applyLanguage("zh");
+startCarouselAutoplay();
