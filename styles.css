@@ -99,8 +99,14 @@ a {
   height: 38px;
   border-radius: 8px;
   background: var(--wow-red);
-  color: var(--white);
-  font-weight: 900;
+  overflow: hidden;
+}
+
+.brand-mark img {
+  display: block;
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
 }
 
 .brand strong,
