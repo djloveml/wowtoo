@@ -8,15 +8,14 @@
 
 ## GitHub Pages 发布
 
-仓库已添加 GitHub Pages Actions 工作流：`.github/workflows/pages.yml`。
-
 发布步骤：
 
 1. 推送代码到 GitHub 的 `main` 分支。
 2. 打开 GitHub 仓库 `Settings` -> `Pages`。
-3. 在 `Build and deployment` 中选择 `Source: GitHub Actions`。
-4. 等待 `Actions` 中的 `Deploy static site to GitHub Pages` 执行完成。
-5. 访问 `https://djloveml.github.io/wowtoo/`。
+3. 在 `Build and deployment` 中选择 `Source: Deploy from a branch`。
+4. `Branch` 选择 `main`，目录选择 `/(root)`。
+5. 点击 `Save`，等待 Pages 自动发布。
+6. 访问 `https://djloveml.github.io/wowtoo/`。
 
 ## Gitee 代码同步
 
