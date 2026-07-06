@@ -295,11 +295,13 @@ const setActiveCase = (caseKey, options = {}) => {
     window.setTimeout(() => caseImage.classList.remove("is-switching"), 220);
   }
 
-  if (options.scroll !== false && caseSlides[activeIndex]) {
-    caseSlides[activeIndex].scrollIntoView({
+  if (options.scroll !== false && caseTrack && caseSlides[activeIndex]) {
+    const targetSlide = caseSlides[activeIndex];
+    const targetLeft = targetSlide.offsetLeft - (caseTrack.clientWidth - targetSlide.clientWidth) / 2;
+
+    caseTrack.scrollTo({
+      left: targetLeft,
       behavior: options.instant ? "auto" : "smooth",
-      block: "nearest",
-      inline: "center",
     });
   }
 };
