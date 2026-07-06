@@ -467,7 +467,10 @@ h3 {
 
 .showcase {
   color: var(--white);
-  background: var(--green-dark);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(232, 70, 24, 0.34), rgba(232, 70, 24, 0) 34%),
+    radial-gradient(circle at 88% 12%, rgba(221, 101, 79, 0.2), rgba(221, 101, 79, 0) 30%),
+    linear-gradient(135deg, #24120e 0%, #151515 42%, #0e0e0e 100%);
 }
 
 .showcase .section-kicker,
